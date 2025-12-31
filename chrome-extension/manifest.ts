@@ -48,6 +48,7 @@ const manifest = {
     {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
       js: ['content/index.iife.js'],
+      all_frames: true,
     },
   ],
   web_accessible_resources: [
