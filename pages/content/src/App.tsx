@@ -69,7 +69,7 @@ const App = ({ inputElement, markdown }: AppProps) => {
             : 'bg-[#FDF6E3] shadow-[0_4px_12px_rgba(62,39,35,0.1)] hover:scale-110 hover:bg-[#F5E6C4] hover:shadow-[0_8px_20px_rgba(62,39,35,0.15)] active:scale-95',
         )}
         style={{ border: 'none' }}
-        title={isLoading ? 'Consulting the Codex...' : 'Draft an Insight'}>
+        title={isLoading ? 'Cooking up a reply...' : 'Spice up this thread'}>
         {isLoading ? (
           <div className="relative flex h-6 w-6 items-center justify-center">
             <svg
