@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import '@src/Popup.css';
-import { t } from '@extension/i18n';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage, disabledHostsStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
