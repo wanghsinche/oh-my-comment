@@ -16,25 +16,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         const combinedPromptContent = `
-          System Prompt:
-          ${systemPrompt || 'You are a helpful assistant.'}
+<context>
+  <system_instructions>
+    ${systemPrompt || 'You are a helpful assistant.'}
+  </system_instructions>
 
-          Preset User Preferences:
-          ${presetPrompts || 'No preset prompts provided.'}
+  <user_preferences>
+    ${presetPrompts || 'No specific preferences provided.'}
+  </user_preferences>
 
-          Current Page Content (Markdown):
-          ${domContent}
+  <page_content_markdown>
+    ${domContent}
+  </page_content_markdown>
 
-          Current Input Value (if any):
-          ${currentValue}
+  <current_input_box_value>
+    ${currentValue || '[Empty]'}
+  </current_input_box_value>
 
-          Task: Please generate a concise and appropriate reply based on the above context and system prompt.
-        `;
+  <task>
+    Please generate a concise, insightful, and engaging reply for the input box marked with [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] in the <page_content_markdown>. 
+    Consider the surrounding context and the <user_preferences> provided.
+  </task>
+</context>
+`.trim();
 
         const response = await fetch('https://ark-cn-beijing.bytedance.net/api/v3/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -63,7 +72,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const generatedReply = data.choices[0]?.message?.content || 'No reply generated.';
         sendResponse({ reply: generatedReply });
-
       } catch (error) {
         console.error('Error in generateReply handler:', error);
         sendResponse({ reply: `Error: ${error.message}` });

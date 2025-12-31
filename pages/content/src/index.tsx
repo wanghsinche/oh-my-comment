@@ -1,14 +1,17 @@
-import { createRoot, Root } from 'react-dom/client';
 import App from './App';
+import { getMarkdownFromPage } from './utils/markdown';
 import { disabledHostsStorage } from '@extension/storage';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 
 console.log('content script loaded');
 
 let currentInput: HTMLElement | null = null;
 let injectedDiv: HTMLDivElement | null = null;
 let root: Root | null = null;
+let currentMarkdown: string = '';
 
-function isEditable(element: HTMLElement): boolean {
+const isEditable = (element: HTMLElement): boolean => {
   if (element instanceof HTMLTextAreaElement) {
     return true;
   }
@@ -22,9 +25,9 @@ function isEditable(element: HTMLElement): boolean {
     }
   }
   return false;
-}
+};
 
-function findClosestEditable(element: HTMLElement | null): HTMLElement | null {
+const findClosestEditable = (element: HTMLElement | null): HTMLElement | null => {
   while (element) {
     if (isEditable(element)) {
       return element;
@@ -32,18 +35,18 @@ function findClosestEditable(element: HTMLElement | null): HTMLElement | null {
     element = element.parentElement;
   }
   return null;
-}
+};
 
-function reposition() {
+const reposition = () => {
   if (currentInput && injectedDiv) {
     const rect = currentInput.getBoundingClientRect();
     // Position at bottom-right corner, slightly offset outward
     injectedDiv.style.top = `${window.scrollY + rect.bottom + 8}px`;
     injectedDiv.style.left = `${window.scrollX + rect.right - 48}px`;
   }
-}
+};
 
-function handleEvent(event: Event) {
+const handleEvent = (event: Event) => {
   const target = event.target as HTMLElement;
   const editableElement = findClosestEditable(target);
 
@@ -58,6 +61,8 @@ function handleEvent(event: Event) {
     }
 
     currentInput = editableElement;
+    currentMarkdown = getMarkdownFromPage(currentInput);
+    console.log('[Oh My Comment] Captured Markdown for LLM:', currentMarkdown);
 
     injectedDiv = document.createElement('div');
     injectedDiv.id = 'oh-my-comment-host';
@@ -79,7 +84,7 @@ function handleEvent(event: Event) {
     reposition();
 
     root = createRoot(rootContainer);
-    root.render(<App inputElement={currentInput} />);
+    root.render(<App inputElement={currentInput} markdown={currentMarkdown} />);
   } else {
     const isInsideShadow = injectedDiv && event.composedPath().includes(injectedDiv);
 
@@ -91,9 +96,9 @@ function handleEvent(event: Event) {
       root = null;
     }
   }
-}
+};
 
-async function init() {
+const init = async () => {
   const disabledHosts = await disabledHostsStorage.get();
   const currentHost = window.location.host;
 
@@ -106,6 +111,6 @@ async function init() {
   document.addEventListener('focusin', handleEvent);
   window.addEventListener('resize', reposition);
   window.addEventListener('scroll', reposition, true);
-}
+};
 
 init();
