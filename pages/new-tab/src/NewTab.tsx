@@ -1,29 +1,19 @@
 import '@src/NewTab.css';
-import '@src/NewTab.scss';
-import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
-import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import { withErrorBoundary, withSuspense } from '@extension/shared';
+import { ErrorDisplay, LoadingSpinner } from '@extension/ui';
 
 const NewTab = () => {
-  const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'new-tab/logo_horizontal.svg' : 'new-tab/logo_horizontal_dark.svg';
-
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
-
-  console.log(t('hello', 'World'));
   return (
-    <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
-      <header className={cn('App-header', isLight ? 'text-gray-900' : 'text-gray-100')}>
-        <button onClick={goGithubSite}>
-          <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-        </button>
-        <p>
-          Edit <code>pages/new-tab/src/NewTab.tsx</code>
+    <div className="min-h-screen font-serif flex flex-col items-center justify-center bg-[#FDF6E3] text-[#3E2723]">
+      <div className="max-w-md text-center flex flex-col gap-6 animate-in fade-in duration-1000">
+        <h1 className="text-5xl font-serif tracking-tighter">
+          The Codex Workspace
+        </h1>
+        <div className="h-[1px] w-full bg-[#3E2723]/10"></div>
+        <p className="text-lg italic opacity-60">
+          "Simplicity is the ultimate sophistication."
         </p>
-        <h6>The color of this paragraph is defined using SASS.</h6>
-        <ToggleButton onClick={exampleThemeStorage.toggle}>{t('toggleTheme')}</ToggleButton>
-      </header>
+      </div>
     </div>
   );
 };

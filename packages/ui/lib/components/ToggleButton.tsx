@@ -6,13 +6,16 @@ import type { ComponentPropsWithoutRef } from 'react';
 type ToggleButtonProps = ComponentPropsWithoutRef<'button'>;
 
 export const ToggleButton = ({ className, children, ...props }: ToggleButtonProps) => {
-  const { isLight } = useStorage(exampleThemeStorage);
+  const theme = useStorage(exampleThemeStorage);
+  const isLight = theme === 'light';
 
   return (
     <button
       className={cn(
-        'mt-4 rounded border-2 px-4 py-1 font-bold shadow hover:scale-105',
-        isLight ? 'border-black bg-white text-black' : 'border-white bg-black text-white',
+        'rounded border px-4 py-1 font-serif text-sm transition-all active:scale-95',
+        isLight 
+          ? 'border-[#3E2723]/20 bg-[#FDF6E3] text-[#3E2723] hover:bg-[#F5E6C4]' 
+          : 'border-[#F5E6C4]/20 bg-[#1C1C1A] text-[#F5E6C4] hover:bg-[#2C2C2A]',
         className,
       )}
       onClick={exampleThemeStorage.toggle}

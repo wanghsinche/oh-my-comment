@@ -5,4 +5,7 @@ export default {
     extend: {},
   },
   plugins: [],
+  corePlugins: {
+    preflight: false,
+  },
 } as Omit<Config, 'content'>;

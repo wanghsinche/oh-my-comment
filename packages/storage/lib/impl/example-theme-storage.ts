@@ -1,28 +1,21 @@
 import { createStorage, StorageEnum } from '../base/index.js';
-import type { ThemeStateType, ThemeStorageType } from '../base/index.js';
+import type { BaseStorageType } from '../base/types.js';
 
-const storage = createStorage<ThemeStateType>(
-  'theme-storage-key',
-  {
-    theme: 'light',
-    isLight: true,
-  },
-  {
-    storageEnum: StorageEnum.Local,
-    liveUpdate: true,
-  },
-);
+type Theme = 'light' | 'dark';
 
-export const exampleThemeStorage: ThemeStorageType = {
+type ThemeStorage = BaseStorageType<Theme> & {
+  toggle: () => Promise<void>;
+};
+
+const storage = createStorage<Theme>('theme-storage-key', 'light', {
+  storageEnum: StorageEnum.Local,
+  liveUpdate: true,
+});
+
+export const exampleThemeStorage: ThemeStorage = {
   ...storage,
   toggle: async () => {
-    await storage.set(currentState => {
-      const newTheme = currentState.theme === 'light' ? 'dark' : 'light';
-
-      return {
-        theme: newTheme,
-        isLight: newTheme === 'light',
-      };
-    });
+    const currentTheme = await storage.get();
+    await storage.set(currentTheme === 'light' ? 'dark' : 'light');
   },
 };

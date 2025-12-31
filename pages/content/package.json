@@ -21,9 +21,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@extension/env": "workspace:*",
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
-    "@extension/env": "workspace:*"
+    "@types/turndown": "^5.0.6",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@extension/hmr": "workspace:*",
