@@ -1,5 +1,5 @@
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { presetPromptsStorage, apiKeyStorage, exampleThemeStorage } from '@extension/storage';
+import { presetPromptsStorage, apiKeyStorage, exampleThemeStorage, usageStorage } from '@extension/storage';
 import { ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useState, useEffect } from 'react';
 
@@ -11,6 +11,7 @@ const Options = () => {
 
   const savedPrompts = useStorage(presetPromptsStorage);
   const savedApiKey = useStorage(apiKeyStorage);
+  const usage = useStorage(usageStorage);
 
   useEffect(() => {
     if (savedPrompts) setPrompts(savedPrompts);
@@ -22,6 +23,12 @@ const Options = () => {
 
   const handleSavePrompts = () => presetPromptsStorage.set(prompts);
   const handleSaveApiKey = () => apiKeyStorage.set(apiKey);
+  const handleResetUsage = () =>
+    usageStorage.set({
+      requestCount: 0,
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+    });
 
   const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');
 
@@ -67,12 +74,12 @@ const Options = () => {
             <label
               htmlFor="ark-api-key"
               className={cn('ml-1 text-xs italic opacity-60', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
-              Your ARK API Key:
+              Your API Key:
             </label>
             <div className="flex gap-2">
               <input
                 id="ark-api-key"
-                type="password"
+                type="text"
                 className={cn(
                   'flex-grow rounded-none border p-3 outline-none transition-all duration-300',
                   isLight
@@ -95,6 +102,59 @@ const Options = () => {
               </button>
             </div>
           </div>
+        </section>
+
+        {/* Token Usage Section */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <h2
+              className={cn(
+                'text-lg font-bold uppercase tracking-widest',
+                isLight ? 'text-[#3E2723]/70' : 'text-[#F5E6C4]/60',
+              )}>
+              Usage Audit
+            </h2>
+            <div className="h-[1px] flex-grow bg-[#EBD9B4]/30"></div>
+          </div>
+
+          <div
+            className={cn(
+              'grid grid-cols-3 gap-4 border p-4',
+              isLight ? 'border-[#3E2723]/10 bg-[#F5E6C4]/10' : 'border-[#F5E6C4]/20 bg-[#1C1C1A]',
+            )}>
+            <div className="flex flex-col gap-1">
+              <span className={cn('text-[10px] uppercase opacity-50', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                Requests
+              </span>
+              <span className={cn('text-xl font-bold', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                {usage?.requestCount || 0}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className={cn('text-[10px] uppercase opacity-50', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                Input Tokens
+              </span>
+              <span className={cn('text-xl font-bold', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                {((usage?.totalInputTokens || 0) / 1_000_000).toFixed(3)}M
+              </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className={cn('text-[10px] uppercase opacity-50', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                Output Tokens
+              </span>
+              <span className={cn('text-xl font-bold', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
+                {((usage?.totalOutputTokens || 0) / 1_000_000).toFixed(3)}M
+              </span>
+            </div>
+          </div>
+          <button
+            className={cn(
+              'self-start rounded-none px-4 py-1 text-[10px] font-bold uppercase tracking-widest opacity-60 transition-all hover:opacity-100',
+              isLight ? 'text-[#3E2723] border border-[#3E2723]/20' : 'text-[#F5E6C4] border border-[#F5E6C4]/20',
+            )}
+            onClick={handleResetUsage}>
+            Reset Stats
+          </button>
         </section>
 
         {/* Preset Prompts Section */}

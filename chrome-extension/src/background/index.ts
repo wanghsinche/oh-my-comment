@@ -1,5 +1,8 @@
 import 'webextension-polyfill';
-import { presetPromptsStorage, apiKeyStorage } from '@extension/storage';
+import { presetPromptsStorage, apiKeyStorage, usageStorage } from '@extension/storage';
+import { generateText } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+// import { createCerebras } from '@ai-sdk/cerebras';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'generateReply') {
@@ -12,7 +15,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const { domContent, currentValue, prompt: systemPrompt } = request.payload;
 
         if (!apiKey) {
-          throw new Error('ARK API Key is not configured. Please set it in the extension options.');
+          throw new Error('API Key is not configured. Please set it in the extension options.');
         }
 
         const combinedPromptContent = `
@@ -34,50 +37,87 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   </current_input_box_value>
 
   <task>
-    Please generate a concise, insightful, and engaging reply for the input box marked with [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] in the <page_content_markdown>. 
-    Consider the surrounding context and the <user_preferences> provided.
+    Please generate a concise and engaging content for the input box marked with [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] in the <page_content_markdown>. 
+    Consider the surrounding context and the <user_preferences> provided. **DO NOT include any unnecessary explanations or additional text—only provide the content to be inserted.**
   </task>
 </context>
 `.trim();
 
-        const response = await fetch('https://ark-cn-beijing.bytedance.net/api/v3/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'ep-20251227174236-pbsxr',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: combinedPromptContent,
-                  },
-                ],
-              },
-            ],
-          }),
+        // Previous Implementation: Google Gemini
+        const google = createGoogleGenerativeAI({
+          apiKey,
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`LLM API error: ${response.status} - ${JSON.stringify(errorData)}`);
-        }
+        const { text, usage } = await generateText({
+          model: google('gemini-flash-lite-latest'),
+          prompt: combinedPromptContent,
+        });
 
-        const data = await response.json();
-        console.log('LLM API Response:', data);
+        console.log('LLM API Response:', text);
+        console.log('LLM Usage:', usage);
 
-        const generatedReply = data.choices[0]?.message?.content || 'No reply generated.';
-        sendResponse({ reply: generatedReply });
+        // Update usage stats
+        const currentUsage = await usageStorage.get();
+        await usageStorage.set({
+          requestCount: (currentUsage.requestCount || 0) + 1,
+          totalInputTokens: (currentUsage.totalInputTokens || 0) + (usage?.inputTokens || 0),
+          totalOutputTokens: (currentUsage.totalOutputTokens || 0) + (usage?.outputTokens || 0),
+        });
+
+        const filteredReply = filterOutput(text || 'No reply generated.');
+        sendResponse({ reply: filteredReply });
+
+        // To use legacy implementation, uncomment the following line and comment out the SDK logic above:
+        // const legacyReply = await generateReplyLegacy(apiKey, combinedPromptContent);
+        // sendResponse({ reply: filterOutput(legacyReply) });
+
       } catch (error) {
         console.error('Error in generateReply handler:', error);
-        sendResponse({ reply: `Error: ${error.message}` });
+        sendResponse({ reply: `Error: ${(error as Error).message}` });
       }
     })();
 
     return true; // Keep the message port open for the async response
   }
 });
+
+function filterOutput(text: string) {
+  return text.replace(/\[HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR\]/g, '').trim();
+}
+
+/**
+ * Legacy HTTP fetch implementation for reference or fallback.
+ */
+async function generateReplyLegacy(apiKey: string, promptContent: string) {
+  const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'ep-20251227174236-pbsxr',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: promptContent,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`LLM API error: ${response.status} - ${JSON.stringify(errorData)}`);
+  }
+
+  const data = await response.json();
+  console.log('Legacy LLM API Response:', data);
+
+  return data.choices[0]?.message?.content || 'No reply generated.';
+}
