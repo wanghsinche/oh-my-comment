@@ -10,13 +10,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       try {
         console.log('Received generateReply message from content script:', request.payload);
 
-        const presetPrompts = await presetPromptsStorage.get();
+        const personas = await presetPromptsStorage.get();
         const apiKey = await apiKeyStorage.get();
-        const { domContent, currentValue, prompt: systemPrompt } = request.payload;
+        const { domContent, currentValue, prompt: systemPrompt, personaId } = request.payload;
 
         if (!apiKey) {
           throw new Error('API Key is not configured. Please set it in the extension options.');
         }
+
+        const selectedPersona =
+          personas.find(p => p.id === personaId) || personas.find(p => p.isDefault) || personas[0];
+        const personaPrompt = selectedPersona?.prompt || 'No specific preferences provided.';
 
         const combinedPromptContent = `
 <context>
@@ -25,7 +29,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   </system_instructions>
 
   <user_preferences>
-    ${presetPrompts || 'No specific preferences provided.'}
+    ${personaPrompt}
   </user_preferences>
 
   <page_content_markdown>

@@ -1,6 +1,6 @@
 import '@src/Popup.css';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage, disabledHostsStorage } from '@extension/storage';
+import { exampleThemeStorage, disabledHostsStorage, presetPromptsStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState } from 'react';
 
@@ -8,6 +8,7 @@ const Popup = () => {
   const theme = useStorage(exampleThemeStorage);
   const isLight = theme === 'light';
   const disabledHosts = useStorage(disabledHostsStorage);
+  const personas = useStorage(presetPromptsStorage);
   const [currentHost, setCurrentHost] = useState<string>('');
 
   useEffect(() => {
@@ -38,6 +39,14 @@ const Popup = () => {
     });
   };
 
+  const handleSelectPersona = async (id: string) => {
+    const newPersonas = personas.map(p => ({
+      ...p,
+      isDefault: p.id === id,
+    }));
+    await presetPromptsStorage.set(newPersonas);
+  };
+
   const openOptions = () => {
     chrome.runtime.openOptionsPage();
   };
@@ -45,7 +54,7 @@ const Popup = () => {
   return (
     <div
       className={cn(
-        'mx-auto flex w-full flex-col items-center border border-[#EBD9B4] p-5',
+        'mx-auto flex w-[280px] flex-col items-center border border-[#EBD9B4] p-5',
         isLight ? 'bg-[#FDF6E3]' : 'bg-[#1C1C1A]',
       )}>
       <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -79,6 +88,55 @@ const Popup = () => {
             )}>
             Settings
           </button>
+
+          {/* Persona Selection Section */}
+          <div className="flex w-full flex-col items-center gap-2">
+            <div className="flex w-full items-center gap-2">
+              <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+              <span
+                className={cn(
+                  'text-[10px] font-bold uppercase tracking-widest opacity-40',
+                  isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+                )}>
+                Reply Persona
+              </span>
+              <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              {personas?.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => handleSelectPersona(p.id)}
+                  className={cn(
+                    'group flex w-full items-center justify-between border px-3 py-2 text-left transition-all',
+                    p.isDefault
+                      ? isLight
+                        ? 'border-[#3E2723] bg-[#3E2723]/5'
+                        : 'border-[#F5E6C4] bg-[#F5E6C4]/10'
+                      : isLight
+                      ? 'border-[#3E2723]/10 hover:bg-[#3E2723]/5'
+                      : 'border-[#F5E6C4]/10 hover:bg-[#F5E6C4]/5',
+                  )}>
+                  <span
+                    className={cn(
+                      'truncate text-xs',
+                      isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+                      p.isDefault ? 'font-bold' : 'opacity-70',
+                    )}>
+                    {p.name}
+                  </span>
+                  {p.isDefault && (
+                    <span
+                      className={cn(
+                        'h-1.5 w-1.5 rounded-full',
+                        isLight ? 'bg-[#3E2723]' : 'bg-[#F5E6C4]',
+                      )}></span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {currentHost && (
             <div className="flex w-full flex-col items-center gap-2">

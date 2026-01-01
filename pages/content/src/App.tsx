@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { presetPromptsStorage } from '@extension/storage';
+import { useStorage } from '@extension/shared';
 
 interface AppProps {
   inputElement: HTMLElement;
@@ -7,6 +9,7 @@ interface AppProps {
 
 const App = ({ inputElement, markdown }: AppProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const personas = useStorage(presetPromptsStorage);
 
   const getElementValue = (element: HTMLElement): string => {
     if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
@@ -35,6 +38,8 @@ const App = ({ inputElement, markdown }: AppProps) => {
   const handleClick = async () => {
     setIsLoading(true);
 
+    const defaultPersona = personas?.find(p => p.isDefault) || personas?.[0];
+
     const systemPrompt =
       '你是一个基于上下文的快速评论助手。请根据提供的网页内容（Markdown格式），为标记为 [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] 的位置生成**一条**符合用户设定的风格的回复。确保回复内容与网页主题以及该位置的上下文高度相关，避免空洞的套话。';
 
@@ -45,6 +50,7 @@ const App = ({ inputElement, markdown }: AppProps) => {
           prompt: systemPrompt,
           domContent: markdown,
           currentValue: getElementValue(inputElement),
+          personaId: defaultPersona?.id,
         },
       },
       response => {
