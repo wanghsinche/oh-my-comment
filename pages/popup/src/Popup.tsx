@@ -1,6 +1,6 @@
 import '@src/Popup.css';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage, disabledHostsStorage, presetPromptsStorage } from '@extension/storage';
+import { exampleThemeStorage, disabledHostsStorage, presetPromptsStorage, hostPersonaStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState } from 'react';
 
@@ -9,6 +9,7 @@ const Popup = () => {
   const isLight = theme === 'light';
   const disabledHosts = useStorage(disabledHostsStorage);
   const personas = useStorage(presetPromptsStorage);
+  const hostPersonas = useStorage(hostPersonaStorage);
   const [currentHost, setCurrentHost] = useState<string>('');
 
   useEffect(() => {
@@ -40,21 +41,23 @@ const Popup = () => {
   };
 
   const handleSelectPersona = async (id: string) => {
-    const newPersonas = personas.map(p => ({
-      ...p,
-      isDefault: p.id === id,
-    }));
-    await presetPromptsStorage.set(newPersonas);
+    if (!currentHost) return;
+    await hostPersonaStorage.set({
+        ...hostPersonas,
+        [currentHost]: id
+    });
   };
 
   const openOptions = () => {
     chrome.runtime.openOptionsPage();
   };
 
+  const activePersonaId = (currentHost && hostPersonas[currentHost]) || personas.find(p => p.isDefault)?.id || personas[0]?.id;
+
   return (
     <div
       className={cn(
-        'mx-auto flex w-[280px] flex-col items-center border border-[#EBD9B4] p-5',
+        'mx-auto w-full flex flex-col items-center border border-[#EBD9B4] p-5',
         isLight ? 'bg-[#FDF6E3]' : 'bg-[#1C1C1A]',
       )}>
       <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -104,37 +107,40 @@ const Popup = () => {
             </div>
 
             <div className="flex w-full flex-col gap-1">
-              {personas?.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => handleSelectPersona(p.id)}
-                  className={cn(
-                    'group flex w-full items-center justify-between border px-3 py-2 text-left transition-all',
-                    p.isDefault
-                      ? isLight
-                        ? 'border-[#3E2723] bg-[#3E2723]/5'
-                        : 'border-[#F5E6C4] bg-[#F5E6C4]/10'
-                      : isLight
-                      ? 'border-[#3E2723]/10 hover:bg-[#3E2723]/5'
-                      : 'border-[#F5E6C4]/10 hover:bg-[#F5E6C4]/5',
-                  )}>
-                  <span
-                    className={cn(
-                      'truncate text-xs',
-                      isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
-                      p.isDefault ? 'font-bold' : 'opacity-70',
-                    )}>
-                    {p.name}
-                  </span>
-                  {p.isDefault && (
-                    <span
-                      className={cn(
-                        'h-1.5 w-1.5 rounded-full',
-                        isLight ? 'bg-[#3E2723]' : 'bg-[#F5E6C4]',
-                      )}></span>
-                  )}
-                </button>
-              ))}
+              {personas?.map(p => {
+                const isActive = p.id === activePersonaId;
+                return (
+                    <button
+                        key={p.id}
+                        onClick={() => handleSelectPersona(p.id)}
+                        className={cn(
+                            'group flex w-full items-center justify-between border px-3 py-2 text-left transition-all',
+                            isActive
+                            ? isLight
+                                ? 'border-[#3E2723] bg-[#3E2723]/5'
+                                : 'border-[#F5E6C4] bg-[#F5E6C4]/10'
+                            : isLight
+                            ? 'border-[#3E2723]/10 hover:bg-[#3E2723]/5'
+                            : 'border-[#F5E6C4]/10 hover:bg-[#F5E6C4]/5',
+                        )}>
+                        <span
+                            className={cn(
+                            'truncate text-xs',
+                            isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+                            isActive ? 'font-bold' : 'opacity-70',
+                            )}>
+                            {p.name}
+                        </span>
+                        {isActive && (
+                            <span
+                            className={cn(
+                                'h-1.5 w-1.5 rounded-full',
+                                isLight ? 'bg-[#3E2723]' : 'bg-[#F5E6C4]',
+                            )}></span>
+                        )}
+                    </button>
+                );
+              })}
             </div>
           </div>
 

@@ -25,6 +25,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const combinedPromptContent = `
 <context>
   <system_instructions>
+    Today's date: ${new Date().toISOString().split('T')[0]}
     ${systemPrompt || 'You are a helpful assistant.'}
   </system_instructions>
 

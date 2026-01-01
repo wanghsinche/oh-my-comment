@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { presetPromptsStorage } from '@extension/storage';
+import { presetPromptsStorage, hostPersonaStorage } from '@extension/storage';
 import { useStorage } from '@extension/shared';
 
 interface AppProps {
@@ -10,6 +10,7 @@ interface AppProps {
 const App = ({ inputElement, markdown }: AppProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const personas = useStorage(presetPromptsStorage);
+  const hostPersonas = useStorage(hostPersonaStorage);
 
   const getElementValue = (element: HTMLElement): string => {
     if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
@@ -18,27 +19,64 @@ const App = ({ inputElement, markdown }: AppProps) => {
     return element.innerHTML;
   };
 
-  const simulateTextInput = (element: HTMLElement, text: string) => {
+  const simulateTextInput = async (element: HTMLElement, text: string) => {
     element.focus();
 
-    if (element.isContentEditable) {
-      document.execCommand('insertText', false, text);
-    } else if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
-      const event = new InputEvent('input', {
-        bubbles: true,
-        cancelable: true,
-        data: text,
-        inputType: 'insertText',
-      });
-      element.value = text;
-      element.dispatchEvent(event);
+    // 1. Try to copy to clipboard for user convenience and as a fallback
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.warn('Clipboard write failed:', err);
+    }
+
+    // 2. Simulate a Paste Event (highly effective for modern editors like Twitter's Lexical/Draft.js)
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', text);
+
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    // If the site handles the paste event and cancels it (calling preventDefault), 
+    // it usually means they've handled the insertion themselves.
+    const wasHandledByPaste = !element.dispatchEvent(pasteEvent);
+
+    if (wasHandledByPaste) {
+      return;
+    }
+
+    // 3. Fallback to execCommand 'insertText'
+    if (document.execCommand('insertText', false, text)) {
+      return;
+    }
+
+    // 4. Final fallback for standard inputs
+    if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
+      const start = element.selectionStart ?? 0;
+      const end = element.selectionEnd ?? 0;
+      element.setRangeText(text, start, end, 'end');
+      element.dispatchEvent(new InputEvent('input', { bubbles: true, data: text, inputType: 'insertText' }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    } else if (element.isContentEditable) {
+      // Manual text insertion for contentEditable as a last resort
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(text));
+        range.collapse(false);
+        element.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      }
     }
   };
 
   const handleClick = async () => {
     setIsLoading(true);
 
-    const defaultPersona = personas?.find(p => p.isDefault) || personas?.[0];
+    const currentHost = window.location.host;
+    const personaId = hostPersonas[currentHost] || personas?.find(p => p.isDefault)?.id || personas?.[0]?.id;
 
     const systemPrompt =
       '你是一个基于上下文的快速评论助手。请根据提供的网页内容（Markdown格式），为标记为 [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] 的位置生成**一条**符合用户设定的风格的回复。确保回复内容与网页主题以及该位置的上下文高度相关，避免空洞的套话。';
@@ -50,12 +88,12 @@ const App = ({ inputElement, markdown }: AppProps) => {
           prompt: systemPrompt,
           domContent: markdown,
           currentValue: getElementValue(inputElement),
-          personaId: defaultPersona?.id,
+          personaId,
         },
       },
-      response => {
+      async response => {
         if (response?.reply) {
-          simulateTextInput(inputElement, response.reply);
+          await simulateTextInput(inputElement, response.reply);
         }
         setIsLoading(false);
       },
