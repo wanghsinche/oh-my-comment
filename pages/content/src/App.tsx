@@ -36,7 +36,7 @@ const App = ({ inputElement, markdown }: AppProps) => {
     setIsLoading(true);
 
     const systemPrompt =
-      '你是一个社交媒体评论助手。请根据提供的网页内容（Markdown格式），为标记为 [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] 的位置生成**一条**简短、幽默且富有洞察力的评论。确保评论与网页主题以及该位置的上下文高度相关，避免空洞的套话。';
+      '你是一个基于上下文的快速评论助手。请根据提供的网页内容（Markdown格式），为标记为 [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] 的位置生成**一条**符合用户设定的风格的回复。确保回复内容与网页主题以及该位置的上下文高度相关，避免空洞的套话。';
 
     chrome.runtime.sendMessage(
       {
