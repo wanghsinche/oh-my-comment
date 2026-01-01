@@ -41,9 +41,9 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
       const blacklist = ['click here', 'read more', 'learn more', 'more info', 'report', 'submit', 'sign up', 'log in', 'download', '举报', '点击这里', '了解更多', '举报评论'];
       const text = content.trim().toLowerCase();
       if (blacklist.includes(text)) {
-        return '';
+        return '\n';
       }
-      return content;
+      return content+'\n';
     }
   })
 
@@ -58,7 +58,7 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
         const value = meta.content || '';
         return `\n\n[Meta: ${name} = ${value}]\n\n`;
       }
-      return '';
+      return '\n';
     },
   });
 
