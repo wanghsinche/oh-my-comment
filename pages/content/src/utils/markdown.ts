@@ -11,8 +11,7 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
 
   // Clean noise
   turndownService.addRule('remove-noise', {
-    filter: node =>
-      ['script', 'style', 'noscript', 'iframe', 'canvas', 'svg'].includes(node.nodeName.toLowerCase()),
+    filter: node => ['script', 'style', 'noscript', 'iframe', 'canvas', 'svg'].includes(node.nodeName.toLowerCase()),
     replacement: () => '',
   });
 
@@ -20,8 +19,12 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
     filter: 'img',
     replacement: (content, node) => {
       const img = node as HTMLImageElement;
+      const title = img.title ? ` (title: ${img.title})` : '';
       const alt = img.alt ? ` (alt: ${img.alt})` : '';
-      return `[image${alt}]`;
+      if (!img.alt && !img.title){
+        return '';
+      } 
+      return `[IMG${alt}${title}]`;
     },
   });
 
@@ -35,26 +38,49 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
     replacement: content => content,
   });
 
-  turndownService.addRule('filter-words', {
-    filter: ['a','button','div', 'span'],
+  turndownService.addRule('filter-action-links', {
+    filter: ['a', 'button', 'div', 'span'],
     replacement: (content, node) => {
-      const blacklist = ['click here', 'read more', 'learn more', 'more info', 'report', 'submit', 'sign up', 'log in', 'download', '举报', '点击这里', '了解更多', '举报评论'];
+      const blacklist = [
+        'click here',
+        'read more',
+        'learn more',
+        'more info',
+        'report',
+        'submit',
+        'sign up',
+        'log in',
+        'download',
+        '举报',
+        '点击这里',
+        '了解更多',
+        '举报评论',
+      ];
       const text = content.trim().toLowerCase();
       if (blacklist.includes(text)) {
         return '\n';
       }
-      return content+'\n';
-    }
-  })
+      return content + '\n';
+    },
+  });
 
   turndownService.addRule('get-meta-content', {
     filter: 'meta',
     replacement: (content, node) => {
       const meta = node as HTMLMetaElement;
-      const usefulNames = ['description', 'keywords', 'author', 'viewport', 'og:title', 'og:description', 'twitter:title', 'twitter:description'];
+      const usefulNames = [
+        'description',
+        'keywords',
+        'author',
+        'viewport',
+        'og:title',
+        'og:description',
+        'twitter:title',
+        'twitter:description',
+      ];
 
       if (meta.name && usefulNames.includes(meta.name.toLowerCase())) {
-        const name = meta.name ;
+        const name = meta.name;
         const value = meta.content || '';
         return `\n\n[Meta: ${name} = ${value}]\n\n`;
       }
@@ -70,17 +96,63 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
     replacement: () => '\n\n[HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR]\n\n',
   });
 
-  // 10-level ancestor context extraction
-  const getContextHtml = (element: HTMLElement, levels: number): string => {
-    let current: HTMLElement | null = element;
-    for (let i = 0; i < levels; i++) {
-      if (current?.parentElement) {
-        current = current.parentElement;
+  // Context extraction with retry mechanism for insufficient content
+  const getContextHtml = (element: HTMLElement, initialLevels: number): string => {
+    let current: HTMLElement = element;
+    let levelsClimbed = 0;
+    const MIN_TEXT_LENGTH = 1000;
+    const MAX_LEVELS = 50;
+
+    // Helper to climb one step
+    const climb = (el: HTMLElement): HTMLElement | null => {
+      if (el.parentElement) {
+        return el.parentElement;
+      } else if (el.parentNode instanceof ShadowRoot) {
+        return el.parentNode.host as HTMLElement;
+      }
+      return null;
+    };
+
+    // Initial climb
+    for (let i = 0; i < initialLevels; i++) {
+      const parent = climb(current);
+      if (parent) {
+        current = parent;
+        levelsClimbed++;
       } else {
         break;
       }
     }
-    return current?.outerHTML || '';
+
+    // Retry loop if content is insufficient
+    while (levelsClimbed < MAX_LEVELS) {
+      // Stop if we hit major structural boundaries
+      if (current.tagName.toLowerCase() === 'body' || current.tagName.toLowerCase() === 'html') {
+        break;
+      }
+
+      // Check text content length
+      if ((current.textContent?.length || 0) >= MIN_TEXT_LENGTH) {
+        break;
+      }
+
+      // Climb more levels (step of 5)
+      let climbedInStep = 0;
+      for (let i = 0; i < 5; i++) {
+        const parent = climb(current);
+        if (parent) {
+          current = parent;
+          levelsClimbed++;
+          climbedInStep++;
+        } else {
+          break;
+        }
+      }
+
+      if (climbedInStep === 0) break; // Reached top
+    }
+
+    return current.outerHTML;
   };
 
   // Temporarily mark the input element
@@ -92,18 +164,17 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
     // If the main content already contains our input, we don't need to append context separately
     // as it will be captured (and marked) during the main content conversion.
     let originalHtml = '';
-    if (strategy !== 'with-context' && mainContent.contains(inputElement)) { // just for potential future use
-      originalHtml = mainContent.outerHTML;
-    } else {
-      const contextHtml = getContextHtml(inputElement, 10);
-      originalHtml = `
+
+    let contextHtml = getContextHtml(inputElement, 10);
+    
+
+    originalHtml = `
         <!-- Page head Content -->
         ${head.outerHTML}
         
         <!-- Immediate Context Around Input -->
         ${contextHtml}
       `;
-    }
 
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = originalHtml;
@@ -113,7 +184,7 @@ export const getMarkdownFromPage = (inputElement: HTMLElement): string => {
         ['aria-label', 'aria-description'].forEach(attr => {
           const value = element.getAttribute(attr);
           if (value) {
-            const text = ` [${attr}: ${value}]`;
+            const text = `(${attr}: ${value})`;
             const voidTags = [
               'area',
               'base',
