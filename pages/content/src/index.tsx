@@ -41,7 +41,7 @@ const reposition = () => {
   if (currentInput && injectedDiv) {
     const rect = currentInput.getBoundingClientRect();
     // Position at bottom-right corner, slightly offset outward
-    injectedDiv.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    injectedDiv.style.top = `${window.scrollY + rect.bottom - 52}px`;
     injectedDiv.style.left = `${window.scrollX + rect.right - 48}px`;
   }
 };

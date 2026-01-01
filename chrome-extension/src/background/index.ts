@@ -38,6 +38,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   <task>
     Please generate a concise and engaging content for the input box marked with [HERE_IS_THE_INPUT_BOX_I_WANT_TO_GENERATE_FOR] in the <page_content_markdown>. 
+    If you can not find such a marker, generate content relevant to the overall context of the page. and focus on the bottom part of the content, that is likely where the input box is located.
     Consider the surrounding context and the <user_preferences> provided. **DO NOT include any unnecessary explanations or additional text—only provide the content to be inserted.**
   </task>
 </context>
