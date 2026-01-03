@@ -12,10 +12,10 @@ export const ToggleButton = ({ className, children, ...props }: ToggleButtonProp
   return (
     <button
       className={cn(
-        'rounded border px-4 py-1 font-serif text-sm transition-all active:scale-95',
+        'rounded-xl border px-4 py-2 font-sans text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm',
         isLight 
-          ? 'border-[#3E2723]/20 bg-[#FDF6E3] text-[#3E2723] hover:bg-[#F5E6C4]' 
-          : 'border-[#F5E6C4]/20 bg-[#1C1C1A] text-[#F5E6C4] hover:bg-[#2C2C2A]',
+          ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' 
+          : 'border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800',
         className,
       )}
       onClick={exampleThemeStorage.toggle}

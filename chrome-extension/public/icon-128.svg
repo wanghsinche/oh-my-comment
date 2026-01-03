@@ -1,0 +1,28 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow Filter -->
+  <defs>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#3b82f6" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background with rounded corners (32px radius for large scale) -->
+  <rect 
+    width="128" 
+    height="128" 
+    rx="32" 
+    fill="#0095FF" 
+    />
+  
+  <!-- "D" Text -->
+  <text 
+    x="64" 
+    y="70" 
+    fill="white" 
+    font-family="sans-serif" 
+    font-weight="bold" 
+    font-style="italic" 
+    font-size="72" 
+    text-anchor="middle" 
+    dominant-baseline="middle">D</text>
+</svg>

@@ -1,42 +1,23 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 1. 浏览器容器 - 使用亮蓝色 #00B0FF -->
-  <rect x="60" y="100" width="392" height="280" rx="20" fill="#00B0FF" />
-  
-  <!-- 2. 标题栏 - 纯白 -->
-  <path d="M60 120C60 108.954 68.9543 100 80 100H432C443.046 100 452 108.954 452 120V150H60V120Z" fill="#FFFFFF" />
-  
-  <!-- 3. 控制按钮 - 扁平纯色 -->
-  <circle cx="95" cy="125" r="7" fill="#FF5252" />
-  <circle cx="120" cy="125" r="7" fill="#FFC107" />
-  <circle cx="145" cy="125" r="7" fill="#4CAF50" />
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- shadow-blue-500/30 logic -->
+    <filter id="shadow" x="0" y="0" width="48" height="48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#3b82f6" flood-opacity="0.3" />
+    </filter>
+  </defs>
 
-  <!-- 4. 抽象播放气泡 - 位于左侧蓝色区域中心 -->
-  <g transform="translate(110, 210)">
-    <!-- 气泡本体：白色 -->
-    <path d="M0 12C0 5.37258 5.37258 0 12 0H72C78.6274 0 84 5.37258 84 12V52C84 58.6274 78.6274 64 72 64H30L8 80V64H6C2.68629 64 0 61.3137 0 58V12Z" fill="#FFFFFF" />
-    <!-- 播放键镂空：颜色回退到背景蓝 #00B0FF -->
-    <path d="M35 22L55 32L35 42V22Z" fill="#00B0FF" />
-  </g>
-
-  <!-- 5. 比例重调的闪电 - 纯黄色 #FFD600 -->
-  <!-- 增加了转折的锐度，并使其在浏览器右侧更有爆发感 -->
-  <path d="M465 130 L245 325 L315 335 L270 490 L455 235 L385 225 Z" fill="#FFD600" />
-
-  <!-- 6. 极简抽象神经网络 - 仅保留核心连接点 -->
-  <g stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.95">
-    <line x1="335" y1="220" x2="395" y2="235" />
-    <line x1="335" y1="220" x2="305" y2="295" />
-    <line x1="395" y1="235" x2="420" y2="300" />
-    <line x1="305" y1="295" x2="380" y2="330" />
-    <line x1="380" y1="330" x2="420" y2="300" />
-  </g>
-  
-  <!-- 节点圆点 -->
-  <g fill="#FFFFFF">
-    <circle cx="335" cy="220" r="8" />
-    <circle cx="395" cy="235" r="8" />
-    <circle cx="420" cy="300" r="8" />
-    <circle cx="305" cy="295" r="10" /> <!-- 核心节点 -->
-    <circle cx="380" cy="330" r="8" />
+  <g filter="url(#shadow)">
+    <!-- Main Box (Centered in the 48px frame) -->
+    <rect x="8" y="8" width="32" height="32" rx="8" fill="#0095FF"/>
+    <text 
+      x="24" 
+      y="25" 
+      fill="white" 
+      font-family="sans-serif" 
+      font-weight="bold" 
+      font-style="italic" 
+      font-size="18" 
+      text-anchor="middle" 
+      dominant-baseline="middle">D</text>
   </g>
 </svg>

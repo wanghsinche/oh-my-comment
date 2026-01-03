@@ -1,45 +1,10 @@
 {
   "extensionDescription": {
-    "description": "Extension description",
-    "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
+    "message": "DashReply: Instant AI-powered social media engagement for marketing professionals.",
+    "description": "The description of the extension"
   },
   "extensionName": {
-    "description": "Extension name",
-    "message": "Chrome extension boilerplate"
-  },
-  "toggleTheme": {
-    "message": "Toggle theme"
-  },
-  "injectButton": {
-    "message": "Click to inject Content Scripts"
-  },
-  "greeting": {
-    "description": "Greeting message",
-    "message": "Hello, My name is $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1",
-        "example": "John Doe"
-      }
-    }
-  },
-  "hello": {
-    "description": "Placeholder example",
-    "message": "Hello $1"
-  },
-  "displayErrorInfo": {
-    "message": "Error occur"
-  },
-  "displayErrorDescription": {
-    "message": "Sorry, something went wrong while loading the page."
-  },
-  "displayErrorDetailsInfo": {
-    "message": "Error details:"
-  },
-  "displayErrorUnknownErrorInfo": {
-    "message": "Unknown error"
-  },
-  "displayErrorReset": {
-    "message": "Run Again"
+    "message": "DashReply",
+    "description": "The name of the extension"
   }
 }

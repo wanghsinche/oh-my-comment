@@ -62,7 +62,7 @@ const handleEvent = (event: Event) => {
 
     currentInput = editableElement;
     currentMarkdown = getMarkdownFromPage(currentInput);
-    console.log('[Oh My Comment] Captured Markdown for LLM:', currentMarkdown);
+    console.log('[DashReply] Captured Markdown for LLM:', currentMarkdown);
 
     injectedDiv = document.createElement('div');
     injectedDiv.id = 'oh-my-comment-host';
@@ -103,7 +103,7 @@ const init = async () => {
   const currentHost = window.location.host;
 
   if (disabledHosts.includes(currentHost)) {
-    console.log(`[Oh My Comment] Disabled on ${currentHost}`);
+    console.log(`[DashReply] Disabled on ${currentHost}`);
     return;
   }
 

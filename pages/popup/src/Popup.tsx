@@ -57,25 +57,30 @@ const Popup = () => {
   return (
     <div
       className={cn(
-        'mx-auto w-full flex flex-col items-center border border-[#EBD9B4] p-5',
-        isLight ? 'bg-[#FDF6E3]' : 'bg-[#1C1C1A]',
+        'mx-auto flex w-full flex-col items-center border p-5 shadow-2xl transition-colors duration-500',
+        isLight ? 'bg-[#F8FAFC] border-slate-200' : 'bg-[#0F172A] border-slate-800',
       )}>
       <div className="flex w-full flex-col items-center gap-6 text-center">
         {/* Header Section */}
         <div
           className={cn(
             'flex w-full flex-col items-center gap-1 border-b pb-4',
-            isLight ? 'border-[#3E2723]/20' : 'border-[#F5E6C4]/20',
+            isLight ? 'border-slate-200' : 'border-slate-800',
           )}>
-          <h1 className={cn('font-serif text-2xl tracking-tight', isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]')}>
-            Oh My Comment
-          </h1>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0095FF] text-white shadow-lg shadow-blue-500/30">
+                <span className="font-bold italic">D</span>
+            </div>
+            <h1 className={cn('text-2xl font-black tracking-tight', isLight ? 'text-[#1E293B]' : 'text-white')}>
+                DashReply
+            </h1>
+          </div>
           <span
             className={cn(
-              'text-[10px] uppercase tracking-[0.2em] opacity-50',
-              isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+              'text-[9px] font-bold uppercase tracking-[0.3em] opacity-40',
+              isLight ? 'text-[#1E293B]' : 'text-slate-400',
             )}>
-            Community Booster
+            Instant AI Growth
           </span>
         </div>
 
@@ -84,29 +89,30 @@ const Popup = () => {
           <button
             onClick={openOptions}
             className={cn(
-              'flex w-full items-center justify-center gap-2 rounded-none border py-3 font-serif text-lg shadow-sm transition-all active:scale-95',
+              'group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl py-3 text-sm font-bold shadow-md transition-all active:scale-95',
               isLight
-                ? 'border-[#3E2723]/20 bg-[#3E2723] text-[#FDF6E3] hover:bg-[#5D4037]'
-                : 'border-[#F5E6C4]/20 bg-[#EBD9B4] text-[#3E2723] hover:bg-[#F5E6C4]',
+                ? 'bg-[#0095FF] text-white hover:bg-blue-600'
+                : 'bg-[#0095FF] text-white hover:bg-blue-600',
             )}>
-            Settings
+            <span className="relative z-10">Dashboard</span>
+            <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
           </button>
 
           {/* Persona Selection Section */}
           <div className="flex w-full flex-col items-center gap-2">
             <div className="flex w-full items-center gap-2">
-              <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+              <div className={cn('h-[1px] flex-grow opacity-10', isLight ? 'bg-slate-900' : 'bg-white')}></div>
               <span
                 className={cn(
                   'text-[10px] font-bold uppercase tracking-widest opacity-40',
-                  isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+                  isLight ? 'text-[#1E293B]' : 'text-slate-400',
                 )}>
-                Reply Persona
+                Active Persona
               </span>
-              <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+              <div className={cn('h-[1px] flex-grow opacity-10', isLight ? 'bg-slate-900' : 'bg-white')}></div>
             </div>
 
-            <div className="flex w-full flex-col gap-1">
+            <div className="flex w-full flex-col gap-1.5">
               {personas?.map(p => {
                 const isActive = p.id === activePersonaId;
                 return (
@@ -114,29 +120,24 @@ const Popup = () => {
                         key={p.id}
                         onClick={() => handleSelectPersona(p.id)}
                         className={cn(
-                            'group flex w-full items-center justify-between border px-3 py-2 text-left transition-all',
+                            'group flex w-full items-center justify-between border px-4 py-2 text-left transition-all rounded-lg',
                             isActive
                             ? isLight
-                                ? 'border-[#3E2723] bg-[#3E2723]/5'
-                                : 'border-[#F5E6C4] bg-[#F5E6C4]/10'
+                                ? 'border-[#0095FF] bg-blue-50 text-[#0095FF]'
+                                : 'border-[#0095FF] bg-blue-500/10 text-[#0095FF]'
                             : isLight
-                            ? 'border-[#3E2723]/10 hover:bg-[#3E2723]/5'
-                            : 'border-[#F5E6C4]/10 hover:bg-[#F5E6C4]/5',
+                            ? 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                            : 'border-slate-800 text-slate-400 hover:border-slate-700 hover:bg-slate-800/50',
                         )}>
                         <span
                             className={cn(
-                            'truncate text-xs',
-                            isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
-                            isActive ? 'font-bold' : 'opacity-70',
+                            'truncate text-xs font-semibold',
+                            isActive ? 'opacity-100' : 'opacity-70',
                             )}>
                             {p.name}
                         </span>
                         {isActive && (
-                            <span
-                            className={cn(
-                                'h-1.5 w-1.5 rounded-full',
-                                isLight ? 'bg-[#3E2723]' : 'bg-[#F5E6C4]',
-                            )}></span>
+                            <div className="h-1.5 w-1.5 rounded-full bg-[#0095FF] shadow-[0_0_8px_rgba(0,149,255,0.6)]"></div>
                         )}
                     </button>
                 );
@@ -147,21 +148,21 @@ const Popup = () => {
           {currentHost && (
             <div className="flex w-full flex-col items-center gap-2">
               <div className="flex w-full items-center gap-2">
-                <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+                <div className={cn('h-[1px] flex-grow opacity-10', isLight ? 'bg-slate-900' : 'bg-white')}></div>
                 <span
                   className={cn(
                     'text-[10px] font-bold uppercase tracking-widest opacity-40',
-                    isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+                    isLight ? 'text-[#1E293B]' : 'text-slate-400',
                   )}>
-                  Active Channel
+                  Channel Info
                 </span>
-                <div className="h-[1px] flex-grow bg-[#EBD9B4] opacity-30"></div>
+                <div className={cn('h-[1px] flex-grow opacity-10', isLight ? 'bg-slate-900' : 'bg-white')}></div>
               </div>
 
               <span
                 className={cn(
-                  'mb-2 max-w-full truncate px-2 font-serif text-sm italic',
-                  isLight ? 'text-[#5D4037]' : 'text-[#F5E6C4]/80',
+                  'mb-2 max-w-full truncate px-2 text-xs font-medium italic',
+                  isLight ? 'text-slate-500' : 'text-slate-400',
                 )}>
                 {currentHost}
               </span>
@@ -169,27 +170,27 @@ const Popup = () => {
               <button
                 onClick={toggleDisableCurrentHost}
                 className={cn(
-                  'flex w-full items-center justify-center gap-2 rounded-none border py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-all active:scale-95',
+                  'flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95',
                   isCurrentHostDisabled
-                    ? 'border-[#3E2723]/30 bg-transparent text-[#3E2723]/60 hover:border-[#3E2723]'
-                    : 'border-rose-900/20 bg-transparent text-rose-900/70 hover:border-rose-900 hover:text-rose-900',
+                    ? 'border-blue-500/30 bg-blue-500/5 text-blue-600 hover:bg-blue-500/10'
+                    : 'border-rose-500/30 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10',
                 )}>
-                {isCurrentHostDisabled ? 'Enable here' : 'Disable here'}
+                {isCurrentHostDisabled ? 'Enable Dash' : 'Disable Dash'}
               </button>
             </div>
           )}
         </div>
 
         {/* Footer Toggle */}
-        <div className="flex w-full items-center justify-center gap-3 border-t border-[#3E2723]/10 pt-4">
+        <div className={cn('flex w-full items-center justify-center gap-3 border-t pt-4', isLight ? 'border-slate-100' : 'border-slate-800')}>
           <span
             className={cn(
               'text-[10px] font-bold uppercase tracking-widest opacity-40',
-              isLight ? 'text-[#3E2723]' : 'text-[#F5E6C4]',
+              isLight ? 'text-[#1E293B]' : 'text-slate-400',
             )}>
-            Theme
+            Appearance
           </span>
-          <ToggleButton>{isLight ? 'Sun' : 'Moon'}</ToggleButton>
+          <ToggleButton>{isLight ? 'Light' : 'Dark'}</ToggleButton>
         </div>
       </div>
     </div>
